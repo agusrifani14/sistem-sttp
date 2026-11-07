@@ -18,17 +18,19 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:admin,petugas',
+            'name'      => 'required|string|max:255',
+            'email'     => 'required|string|email|unique:users',
+            'password'  => 'required|string|min:8|confirmed',
+            'role'      => 'required|in:admin,petugas',
+            'whatsapp'  => 'required|string|max:20',
         ]);
 
         User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'password'  => Hash::make($request->password),
+            'role'      => $request->role,
+            'whatsapp'  => $request->whatsapp,
         ]);
 
         return redirect()->route('dashboard')->with('success', 'User baru dibuat.');

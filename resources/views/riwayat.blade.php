@@ -140,6 +140,7 @@
                                 <th>No</th>
                                 <th>Tanggal</th>
                                 <th>Pelapor</th>
+                                <th>Kategori Kejahatan</th>
                                 <th>Korban</th>
                                 <th width="200">Aksi</th>
                             </tr>
@@ -150,21 +151,20 @@
                                 <td>{{ $key + 1 }}</td>
                                 <td>{{ \Carbon\Carbon::parse($report->tanggal)->format('d/m/Y') }}</td>
                                 <td>{{ $report->pelapor_nama }}</td>
+                                <td>
+                                    <span class="badge bg-info text-dark">{{ $report->kategori_kejahatan ?? 'Lainnya' }}</span>
+                                </td>
                                 <td>{{ $report->korban_nama }}</td>
                                 <td>
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="{{ route('reports.downloadWord', $report->id) }}" class="btn btn-primary" title="Download Word">
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ route('reports.downloadWord', $report->id) }}" class="btn btn-primary btn-sm">
                                             <i class="bi bi-file-word"></i> Word
-                                        </a>
-                                        <a href="{{ route('reports.downloadPdf', $report->id) }}" class="btn btn-success" title="Download PDF">
-                                            <i class="bi bi-file-earmark-pdf"></i> PDF
                                         </a>
                                         <form action="{{ route('reports.destroy', $report->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-danger" 
-                                                    onclick="return confirm('Apakah Anda yakin ingin menghapus laporan ini?')"
-                                                    title="Hapus Laporan">
+                                            <button type="submit" class="btn btn-danger btn-sm" 
+                                                    onclick="return confirm('Apakah Anda yakin ingin menghapus laporan ini?')">
                                                 <i class="bi bi-trash"></i> Hapus
                                             </button>
                                         </form>

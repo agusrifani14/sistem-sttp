@@ -12,11 +12,8 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReportController extends Controller
 {
-    /* --------------------------------------------------------------------------
-     *  DASHBOARD RINGKASAN → PETUGAS
-     *  (Tidak mengganggu halaman buat laporan yang sudah ada)
-     * ------------------------------------------------------------------------*/
-    public function dashboard()
+
+    public function dashboard(Request $request)
     {
         $userId = Auth::id();
 
@@ -29,22 +26,43 @@ class ReportController extends Controller
             ->whereMonth('created_at', Carbon::now()->month)
             ->count();
 
-        $recentReports = Report::where('user_id', $userId)
-            ->latest()
-            ->take(5)
-            ->get();
+        // Build query with search filters
+        $query = Report::where('user_id', $userId);
+
+        // Filter by date (tanggal)
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal', $request->input('tanggal'));
+        }
+
+        // Filter by reporter/legal advisor name (pelapor_nama)
+        if ($request->filled('nama')) {
+            $query->where('pelapor_nama', 'like', '%' . $request->input('nama') . '%');
+        }
+
+        // Filter by crime category (kategori_kejahatan)
+        if ($request->filled('kategori')) {
+            $query->where('kategori_kejahatan', $request->input('kategori'));
+        }
+
+        $recentReports = $query->latest()->take(5)->get();
+
+        // Get search parameters to pass back to view
+        $searchTanggal = $request->input('tanggal');
+        $searchNama = $request->input('nama');
+        $searchKategori = $request->input('kategori');
 
         return view('dashboard_petugas_home', compact(
             'totalReports',
             'reportsToday',
             'reportsThisMonth',
-            'recentReports'
+            'recentReports',
+            'searchTanggal',
+            'searchNama',
+            'searchKategori'
         ));
     }
 
-    /* --------------------------------------------------------------------------
-     *  HELPER : KONVERSI ANGKA KE ROMAWI
-     * ------------------------------------------------------------------------*/
+
     private function intToRoman($num)
     {
         $map = [
@@ -67,9 +85,7 @@ class ReportController extends Controller
         return $returnValue;
     }
 
-    /* --------------------------------------------------------------------------
-     *  GENERATE NOMOR STTP
-     * ------------------------------------------------------------------------*/
+
     private function generateNomor()
     {
         $year = date('Y');
@@ -98,32 +114,43 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'petugas_nama' => 'required',
-            'petugas_pangkat' => 'required',
-            'petugas_nrp' => 'required',
-            'petugas_jabatan' => 'required',
-            'hari' => 'required',
+            'petugas_nama' => 'required|string',
+            'petugas_pangkat' => 'required|string',
+            'petugas_nrp' => 'required|string',
+            'petugas_jabatan' => 'required|string',
+            'hari' => 'required|string',
             'tanggal' => 'required|date',
-            'jam' => 'required',
-            'pelapor_nama' => 'required',
-            'pelapor_nik' => 'required',
-            'pelapor_ttl' => 'required',
-            'pelapor_agama' => 'required',
-            'pelapor_kewarganegaraan' => 'required',
-            'pelapor_alamat' => 'required',
-            'pelapor_telp' => 'required',
-            'korban_nama' => 'required',
-            'korban_nik' => 'required',
-            'korban_ttl' => 'required',
-            'korban_agama' => 'required',
-            'korban_kewarganegaraan' => 'required',
-            'korban_alamat' => 'required',
-            'korban_telp' => 'required',
-            'deskripsi' => 'required',
-            'bukti.*' => 'image|max:2048'
+            'jam' => 'required|string',
+            'kategori_kejahatan' => 'required|string',
+            'pelapor_nama' => 'required|string',
+            'pelapor_nik' => 'required|regex:/^[0-9]{16}$/',
+            'pelapor_tempat_lahir' => 'required|regex:/^[a-zA-Z\s]+$/i',
+            'pelapor_tanggal_lahir' => 'required|date',
+            'pelapor_ttl' => 'nullable|string',
+            'pelapor_agama' => 'required|string',
+            'pelapor_kewarganegaraan' => 'required|string',
+            'pelapor_alamat' => 'required|string',
+            'pelapor_telp' => 'required|regex:/^[0-9]{9,13}$/',
+            'pelapor_email' => 'required|email',
+            'korban_nama' => 'required|string',
+            'korban_nik' => 'required|regex:/^[0-9]{16}$/',
+            'korban_tempat_lahir' => 'required|regex:/^[a-zA-Z\s]+$/i',
+            'korban_tanggal_lahir' => 'required|date',
+            'korban_ttl' => 'nullable|string',
+            'korban_agama' => 'required|string',
+            'korban_kewarganegaraan' => 'required|string',
+            'korban_alamat' => 'required|string',
+            'korban_telp' => 'required|regex:/^[0-9]{9,13}$/',
+            'korban_email' => 'required|email',
+            'deskripsi' => 'required|string',
+            'bukti.*' => 'nullable|file|mimes:jpeg,png,jpg,webp|max:2048'
         ]);
 
         $validated['user_id'] = Auth::id();
+
+        // Generate combined TTL fields from separated fields
+        $validated['pelapor_ttl'] = $validated['pelapor_tempat_lahir'] . ', ' . $validated['pelapor_tanggal_lahir'];
+        $validated['korban_ttl'] = $validated['korban_tempat_lahir'] . ', ' . $validated['korban_tanggal_lahir'];
 
         // upload bukti
         if ($request->hasFile('bukti')) {
@@ -137,6 +164,15 @@ class ReportController extends Controller
         Report::create($validated);
 
         return back()->with('success', 'Laporan berhasil disimpan!');
+    }
+
+    private function findAuthorizedReport($id): Report
+    {
+        $query = Report::where('id', $id);
+        if (Auth::user()?->role !== 'admin') {
+            $query->where('user_id', Auth::id());
+        }
+        return $query->firstOrFail();
     }
 
     /* --------------------------------------------------------------------------
@@ -153,7 +189,7 @@ class ReportController extends Controller
      * ------------------------------------------------------------------------*/
     public function downloadWord($id)
     {
-        $report = Report::findOrFail($id);
+        $report = $this->findAuthorizedReport($id);
         $nomor = $this->generateNomor();
 
         // Format tanggal - HANYA tanggal, tanpa "Palembang"
@@ -191,20 +227,26 @@ class ReportController extends Controller
         // Pelapor
         $tpl->setValue('pelapor_nama', $this->safe(strtoupper($report->pelapor_nama)));
         $tpl->setValue('pelapor_nik', $this->safe($report->pelapor_nik));
-        $tpl->setValue('pelapor_ttl', $this->safe(strtoupper($report->pelapor_ttl)));
+        $tpl->setValue('pelapor_tempat_lahir', $this->safe(strtoupper($report->pelapor_tempat_lahir)));
+        $tpl->setValue('pelapor_tanggal_lahir', $this->safe($report->pelapor_tanggal_lahir));
+        $tpl->setValue('pelapor_ttl', $this->safe(strtoupper($report->pelapor_tempat_lahir . ', ' . $report->pelapor_tanggal_lahir)));
         $tpl->setValue('pelapor_agama', $this->safe(strtoupper($report->pelapor_agama)));
         $tpl->setValue('pelapor_kewarganegaraan', $this->safe(strtoupper($report->pelapor_kewarganegaraan)));
         $tpl->setValue('pelapor_alamat', $this->safe(strtoupper($report->pelapor_alamat)));
         $tpl->setValue('pelapor_telp', $this->safe($report->pelapor_telp));
+        $tpl->setValue('pelapor_email', $this->safe($report->pelapor_email));
 
         // Korban
         $tpl->setValue('korban_nama', $this->safe(strtoupper($report->korban_nama)));
         $tpl->setValue('korban_nik', $this->safe($report->korban_nik));
-        $tpl->setValue('korban_ttl', $this->safe(strtoupper($report->korban_ttl)));
+        $tpl->setValue('korban_tempat_lahir', $this->safe(strtoupper($report->korban_tempat_lahir)));
+        $tpl->setValue('korban_tanggal_lahir', $this->safe($report->korban_tanggal_lahir));
+        $tpl->setValue('korban_ttl', $this->safe(strtoupper($report->korban_tempat_lahir . ', ' . $report->korban_tanggal_lahir)));
         $tpl->setValue('korban_agama', $this->safe(strtoupper($report->korban_agama)));
         $tpl->setValue('korban_kewarganegaraan', $this->safe(strtoupper($report->korban_kewarganegaraan)));
         $tpl->setValue('korban_alamat', $this->safe(strtoupper($report->korban_alamat)));
         $tpl->setValue('korban_telp', $this->safe($report->korban_telp));
+        $tpl->setValue('korban_email', $this->safe($report->korban_email));
 
         $tpl->setValue('deskripsi', $this->safe($report->deskripsi));
 
@@ -248,7 +290,7 @@ class ReportController extends Controller
      * ------------------------------------------------------------------------*/
     public function downloadPdf($id)
     {
-        $report = Report::findOrFail($id);
+        $report = $this->findAuthorizedReport($id);
         $nomor = $this->generateNomor();
 
         // Format tanggal
@@ -276,7 +318,7 @@ class ReportController extends Controller
      * ------------------------------------------------------------------------*/
     public function destroy($id)
     {
-        $report = Report::findOrFail($id);
+        $report = $this->findAuthorizedReport($id);
 
         if ($report->bukti) {
             foreach (json_decode($report->bukti) as $path) {
@@ -285,7 +327,6 @@ class ReportController extends Controller
         }
 
         $report->delete();
-
-        return back()->with('success', 'Laporan berhasil dihapus.');
+        return redirect()->route('reports.index');
     }
-}
+}   

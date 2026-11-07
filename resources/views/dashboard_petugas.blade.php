@@ -250,6 +250,21 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">KATEGORI KEJAHATAN</label>
+                                            <select class="form-select" name="kategori_kejahatan" required>
+                                                <option value="">Pilih Kategori Kejahatan</option>
+                                                <option value="Manipulasi Data Elektronik">Manipulasi Data Elektronik</option>
+                                                <option value="Penipuan Online">Penipuan Online</option>
+                                                <option value="Pencurian Data">Pencurian Data</option>
+                                                <option value="Penyebaran Konten Ilegal">Penyebaran Konten Ilegal</option>
+                                                <option value="Penghinaan & Fitnah">Penghinaan & Fitnah</option>
+                                                <option value="Akses Ilegal">Akses Ilegal</option>
+                                                <option value="Malware & Virus">Malware & Virus</option>
+                                                <option value="Perdagangan Ilegal Online">Perdagangan Ilegal Online</option>
+                                                <option value="Lainnya">Lainnya</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -269,14 +284,18 @@
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label fw-bold">2. NIK</label>
-                                    <input type="text" class="form-control" name="pelapor_nik" required>
+                                    <input type="text" class="form-control" name="pelapor_nik" pattern="[0-9]{16}" inputmode="numeric" title="NIK hanya boleh angka (16 digit)" required>
                                 </div>
                                 <div class="mb-2">
-                                    <label class="form-label fw-bold">3. TEMPAT, TGL LAHIR</label>
-                                    <input type="text" class="form-control" name="pelapor_ttl" required>
+                                    <label class="form-label fw-bold">3. TEMPAT LAHIR</label>
+                                    <input type="text" class="form-control" name="pelapor_tempat_lahir" pattern="[a-zA-Z\s]+" title="Tempat lahir hanya boleh huruf" required>
                                 </div>
                                 <div class="mb-2">
-                                    <label class="form-label fw-bold">4. AGAMA</label>
+                                    <label class="form-label fw-bold">4. TANGGAL LAHIR</label>
+                                    <input type="date" class="form-control" name="pelapor_tanggal_lahir" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">5. AGAMA</label>
                                     <select class="form-select" name="pelapor_agama" required>
                                         <option value="">Pilih Agama</option>
                                         <option value="ISLAM">ISLAM</option>
@@ -288,16 +307,20 @@
                                     </select>
                                 </div>
                                 <div class="mb-2">
-                                    <label class="form-label fw-bold">5. KEWARGANEGARAAN</label>
+                                    <label class="form-label fw-bold">6. KEWARGANEGARAAN</label>
                                     <input type="text" class="form-control" name="pelapor_kewarganegaraan" value="INDONESIA" required>
                                 </div>
                                 <div class="mb-2">
-                                    <label class="form-label fw-bold">6. ALAMAT LENGKAP</label>
+                                    <label class="form-label fw-bold">7. ALAMAT LENGKAP</label>
                                     <textarea class="form-control" name="pelapor_alamat" rows="3" required></textarea>
                                 </div>
                                 <div class="mb-2">
-                                    <label class="form-label fw-bold">7. NO.TELP/EMAIL</label>
-                                    <input type="text" class="form-control" name="pelapor_telp" required>
+                                    <label class="form-label fw-bold">8. NO.TELP</label>
+                                    <input type="tel" class="form-control" name="pelapor_telp" pattern="[0-9]{9,13}" inputmode="numeric" title="No telp hanya boleh angka (9-13 digit)" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">9. EMAIL</label>
+                                    <input type="email" class="form-control" name="pelapor_email" required>
                                 </div>
                             </div>
                         </div>
@@ -316,14 +339,18 @@
                                 </div>
                                 <div class="mb-2">
                                     <label class="form-label fw-bold">2. NIK</label>
-                                    <input type="text" class="form-control" name="korban_nik" required>
+                                    <input type="text" class="form-control" name="korban_nik" pattern="[0-9]{16}" inputmode="numeric" title="NIK hanya boleh angka (16 digit)" required>
                                 </div>
                                 <div class="mb-2">
-                                    <label class="form-label fw-bold">3. TEMPAT, TGL LAHIR</label>
-                                    <input type="text" class="form-control" name="korban_ttl" required>
+                                    <label class="form-label fw-bold">3. TEMPAT LAHIR</label>
+                                    <input type="text" class="form-control" name="korban_tempat_lahir" pattern="[a-zA-Z\s]+" title="Tempat lahir hanya boleh huruf" required>
                                 </div>
                                 <div class="mb-2">
-                                    <label class="form-label fw-bold">4. AGAMA</label>
+                                    <label class="form-label fw-bold">4. TANGGAL LAHIR</label>
+                                    <input type="date" class="form-control" name="korban_tanggal_lahir" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">5. AGAMA</label>
                                     <select class="form-select" name="korban_agama" required>
                                         <option value="">Pilih Agama</option>
                                         <option value="ISLAM">ISLAM</option>
@@ -335,16 +362,20 @@
                                     </select>
                                 </div>
                                 <div class="mb-2">
-                                    <label class="form-label fw-bold">5. KEWARGANEGARAAN</label>
+                                    <label class="form-label fw-bold">6. KEWARGANEGARAAN</label>
                                     <input type="text" class="form-control" name="korban_kewarganegaraan" value="INDONESIA" required>
                                 </div>
                                 <div class="mb-2">
-                                    <label class="form-label fw-bold">6. ALAMAT LENGKAP</label>
+                                    <label class="form-label fw-bold">7. ALAMAT LENGKAP</label>
                                     <textarea class="form-control" name="korban_alamat" rows="3" required></textarea>
                                 </div>
                                 <div class="mb-2">
-                                    <label class="form-label fw-bold">7. NO.TELP/EMAIL</label>
-                                    <input type="text" class="form-control" name="korban_telp" required>
+                                    <label class="form-label fw-bold">8. NO.TELP</label>
+                                    <input type="tel" class="form-control" name="korban_telp" pattern="[0-9]{9,13}" inputmode="numeric" title="No telp hanya boleh angka (9-13 digit)" required>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label fw-bold">9. EMAIL</label>
+                                    <input type="email" class="form-control" name="korban_email" required>
                                 </div>
                             </div>
                         </div>

@@ -276,6 +276,14 @@
                       <option value="petugas">Petugas</option>
                     </select>
                   </div>
+                  <div class="mb-3">
+                    <label for="whatsapp" class="form-label">
+                      <i class="bi bi-whatsapp text-success"></i> Nomor WhatsApp
+                    </label>
+                    <input type="text" class="form-control" id="whatsapp" name="whatsapp"
+                           placeholder="Contoh: 08123456789" required>
+                    <div class="form-text">Nomor ini digunakan untuk menerima kode OTP saat login.</div>
+                  </div>
                   <button type="submit" class="btn btn-primary">Buat User</button>
                 </form>
               </div>
@@ -297,6 +305,7 @@
                         <th>Nama</th>
                         <th>Email</th>
                         <th>Role</th>
+                        <th><i class="bi bi-whatsapp text-success"></i> WhatsApp</th>
                         <th>Aksi</th>
                       </tr>
                     </thead>
@@ -306,6 +315,13 @@
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
                         <td>{{ $user->role }}</td>
+                        <td>
+                          @if($user->whatsapp)
+                            <span class="text-success"><i class="bi bi-whatsapp"></i> {{ $user->whatsapp }}</span>
+                          @else
+                            <span class="text-danger"><i class="bi bi-exclamation-triangle"></i> Belum diisi</span>
+                          @endif
+                        </td>
                         <td>
                           <button type="button" class="btn btn-warning btn-sm" 
                                   data-bs-toggle="modal" 

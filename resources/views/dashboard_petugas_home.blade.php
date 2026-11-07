@@ -140,6 +140,45 @@
                     </div>
                 </div>
 
+                <!-- Search Form -->
+                <div class="card mb-4" style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 15px;">
+                    <div class="card-body">
+                        <form method="GET" action="{{ route('dashboard.petugas.home') }}" class="row g-3">
+                            <div class="col-md-4">
+                                <label for="tanggal" class="form-label"><i class="bi bi-calendar-event"></i> Tanggal</label>
+                                <input type="date" class="form-control" id="tanggal" name="tanggal" value="{{ $searchTanggal ?? '' }}" style="background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color);">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="nama" class="form-label"><i class="bi bi-person"></i> Nama Pelapor</label>
+                                <input type="text" class="form-control" id="nama" name="nama" placeholder="Cari nama..." value="{{ $searchNama ?? '' }}" style="background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color);">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="kategori" class="form-label"><i class="bi bi-tag"></i> Kategori Kejahatan</label>
+                                <select class="form-select" id="kategori" name="kategori" style="background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color);">
+                                    <option value="">Semua Kategori</option>
+                                    <option value="Manipulasi Data Elektronik" @if(($searchKategori ?? '') === 'Manipulasi Data Elektronik') selected @endif>Manipulasi Data Elektronik</option>
+                                    <option value="Penipuan Online" @if(($searchKategori ?? '') === 'Penipuan Online') selected @endif>Penipuan Online</option>
+                                    <option value="Pencurian Data" @if(($searchKategori ?? '') === 'Pencurian Data') selected @endif>Pencurian Data</option>
+                                    <option value="Penyebaran Konten Ilegal" @if(($searchKategori ?? '') === 'Penyebaran Konten Ilegal') selected @endif>Penyebaran Konten Ilegal</option>
+                                    <option value="Penghinaan & Fitnah" @if(($searchKategori ?? '') === 'Penghinaan & Fitnah') selected @endif>Penghinaan & Fitnah</option>
+                                    <option value="Akses Ilegal" @if(($searchKategori ?? '') === 'Akses Ilegal') selected @endif>Akses Ilegal</option>
+                                    <option value="Malware & Virus" @if(($searchKategori ?? '') === 'Malware & Virus') selected @endif>Malware & Virus</option>
+                                    <option value="Perdagangan Ilegal Online" @if(($searchKategori ?? '') === 'Perdagangan Ilegal Online') selected @endif>Perdagangan Ilegal Online</option>
+                                    <option value="Lainnya" @if(($searchKategori ?? '') === 'Lainnya') selected @endif>Lainnya</option>
+                                </select>
+                            </div>
+                            <div class="col-12 d-flex align-items-end gap-2">
+                                <button type="submit" class="btn btn-primary flex-grow-1">
+                                    <i class="bi bi-search"></i> Cari
+                                </button>
+                                <a href="{{ route('dashboard.petugas.home') }}" class="btn btn-secondary flex-grow-1">
+                                    <i class="bi bi-arrow-clockwise"></i> Reset
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Laporan Terbaru</h5>
                     <a href="{{ route('reports.index') }}" class="btn btn-sm btn-primary">Lihat Semua</a>
@@ -152,8 +191,9 @@
                                 <th>#</th>
                                 <th>Tanggal</th>
                                 <th>Pelapor</th>
+                                <th>Kategori Kejahatan</th>
                                 <th>Korban</th>
-                                <th width="220">Aksi</th>
+                                <th width="140">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -162,22 +202,24 @@
                                     <td>{{ $i + 1 }}</td>
                                     <td>{{ \Carbon\Carbon::parse($report->tanggal)->format('d/m/Y') }}</td>
                                     <td>{{ $report->pelapor_nama }}</td>
+                                    <td>
+                                        <span class="badge bg-info text-dark">{{ $report->kategori_kejahatan }}</span>
+                                    </td>
                                     <td>{{ $report->korban_nama }}</td>
                                     <td>
-                                        <div class="btn-group btn-group-sm" role="group">
-                                            <a class="btn btn-primary" href="{{ route('reports.downloadWord', $report->id) }}">
-                                                <i class="bi bi-file-word"></i> Word
-                                            </a>
-                                            <a class="btn btn-success" href="{{ route('reports.downloadPdf', $report->id) }}">
-                                                <i class="bi bi-file-earmark-pdf"></i> PDF
-                                            </a>
-                                        </div>
+                                        <a class="btn btn-primary btn-sm" href="{{ route('reports.downloadWord', $report->id) }}">
+                                            <i class="bi bi-file-word"></i> Word
+                                        </a>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">
-                                        Belum ada laporan. Silakan buat laporan baru.
+                                    <td colspan="6" class="text-center py-4 text-muted">
+                                        @if($searchTanggal || $searchNama || $searchKategori)
+                                            Hasil pencarian tidak ditemukan. Coba ubah filter pencarian Anda.
+                                        @else
+                                            Belum ada laporan. Silakan buat laporan baru.
+                                        @endif
                                     </td>
                                 </tr>
                             @endforelse

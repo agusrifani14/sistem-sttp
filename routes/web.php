@@ -11,7 +11,12 @@ Route::get('/', function () {
 
 // Login
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
+
+// OTP Verification (WhatsApp)
+Route::get('/otp/verify', [AuthController::class, 'showOtpForm'])->name('otp.verify');
+Route::post('/otp/verify', [AuthController::class, 'verifyOtp'])->name('otp.verify.submit')->middleware('throttle:5,1');
+Route::post('/otp/resend', [AuthController::class, 'resendOtp'])->name('otp.resend')->middleware('throttle:3,1');
 
 // Logout
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
