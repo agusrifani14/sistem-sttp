@@ -11,9 +11,57 @@ Route::get('/', function () {
 
 // Route inisialisasi database (jalankan sekali di browser setelah deploy)
 Route::get('/init-admin', function () {
-    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-    return response('<h3>Sukses: Database berhasil di-migrate dan di-seed!</h3><p>Akun login:</p><ul><li>Admin: <b>admin123@gmail.com</b> / password: <b>admin123</b></li><li>Petugas: <b>petugas123@gmail.com</b> / password: <b>petugas123</b></li></ul><a href="/login">Menuju Halaman Login &rarr;</a>');
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        
+        // Buat atau update admin langsung dengan Hash::make
+        $admin = \App\Models\User::updateOrCreate(
+            ['email' => 'admin123@gmail.com'],
+            [
+                'name'     => 'Administrator',
+                'password' => \Illuminate\Support\Facades\Hash::make('admin123'),
+                'role'     => 'admin',
+                'whatsapp' => '08123456789',
+            ]
+        );
+
+        // Buat atau update petugas
+        $petugas = \App\Models\User::updateOrCreate(
+            ['email' => 'petugas123@gmail.com'],
+            [
+                'name'     => 'Petugas STTP',
+                'password' => \Illuminate\Support\Facades\Hash::make('petugas123'),
+                'role'     => 'petugas',
+                'whatsapp' => '08198765432',
+            ]
+        );
+
+        $driver = config('database.default');
+        $dbPath = config("database.connections.{$driver}.database");
+        $allUsers = \App\Models\User::select('id', 'name', 'email', 'role')->get();
+
+        // Tes autentikasi langsung
+        $testAuth = \Illuminate\Support\Facades\Auth::validate([
+            'email'    => 'admin123@gmail.com',
+            'password' => 'admin123',
+        ]);
+
+        return response()->json([
+            'status'         => 'success',
+            'database'       => $driver,
+            'database_path'  => $dbPath,
+            'test_login'     => $testAuth ? 'VALID (Password OK)' : 'GAGAL (Password Missmatch)',
+            'users_in_db'    => $allUsers,
+            'message'        => 'Database siap! Silakan login di /login dengan admin123@gmail.com / admin123',
+        ], 200, [], JSON_PRETTY_PRINT);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => $e->getMessage(),
+            'file'    => $e->getFile(),
+            'line'    => $e->getLine(),
+        ], 500, [], JSON_PRETTY_PRINT);
+    }
 });
 
 // Login
