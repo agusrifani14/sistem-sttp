@@ -75,9 +75,9 @@ class OtpService
             CURLOPT_URL            => 'https://api.fonnte.com/send',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING       => '',
-            CURLOPT_MAXREDIRS      => 5,
-            CURLOPT_CONNECTTIMEOUT => 7,
-            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_MAXREDIRS      => 3,
+            CURLOPT_CONNECTTIMEOUT => 3,
+            CURLOPT_TIMEOUT        => 4,
             CURLOPT_IPRESOLVE      => CURL_IPRESOLVE_V4,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
@@ -100,13 +100,17 @@ class OtpService
 
         if ($error) {
             Log::error('Fonnte cURL Error: ' . $error);
-            // Fallback: OTP tetap valid di database dan dicatat di log agar proses tidak hang
+            // Simpan kode OTP di session agar petugas tetap bisa verifikasi jika API WA terkendala
+            session()->flash('otp_hint', $otp);
             return true;
         }
 
         $data = json_decode($response, true);
 
-        // Fonnte mengembalikan {"status":true,...} jika berhasil
-        return isset($data['status']) && $data['status'] === true;
+        if (!isset($data['status']) || $data['status'] !== true) {
+            session()->flash('otp_hint', $otp);
+        }
+
+        return true;
     }
 }

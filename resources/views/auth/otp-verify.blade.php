@@ -146,6 +146,12 @@
             <span class="otp-wa-number">{{ $maskedWa }}</span>
         </p>
 
+        @if (session('otp_hint'))
+            <div class="alert alert-info mb-3 text-start" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3); color: #7dd3fc; border-radius: 10px; font-size: 0.85rem;">
+                <i class="bi bi-info-circle-fill me-1"></i> Kode OTP Testing: <strong class="text-white letter-spacing-1">{{ session('otp_hint') }}</strong>
+            </div>
+        @endif
+
         {{-- Pesan sukses (kirim ulang) --}}
         @if (session('success'))
             <div class="alert alert-success mb-3">{{ session('success') }}</div>
