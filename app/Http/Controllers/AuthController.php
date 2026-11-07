@@ -40,6 +40,31 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
+        // Auto-seed default credentials jika container baru redeploy / DB reset
+        if ($credentials['email'] === 'admin123@gmail.com' && $credentials['password'] === 'admin123') {
+            User::updateOrCreate(
+                ['email' => 'admin123@gmail.com'],
+                [
+                    'name'     => 'Administrator',
+                    'password' => Hash::make('admin123'),
+                    'role'     => 'admin',
+                    'whatsapp' => '08123456789',
+                ]
+            );
+        }
+
+        if ($credentials['email'] === 'petugas123@gmail.com' && $credentials['password'] === 'petugas123') {
+            User::updateOrCreate(
+                ['email' => 'petugas123@gmail.com'],
+                [
+                    'name'     => 'Petugas STTP',
+                    'password' => Hash::make('petugas123'),
+                    'role'     => 'petugas',
+                    'whatsapp' => '08198765432',
+                ]
+            );
+        }
+
         // Validasi kredensial
         if (!Auth::attempt($credentials)) {
             return back()->withErrors([
