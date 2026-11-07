@@ -25,15 +25,20 @@ class UserController extends Controller
             'whatsapp'  => 'required|string|max:20',
         ]);
 
+        $cleanWa = preg_replace('/[^0-9]/', '', (string) $request->whatsapp);
+        if (str_starts_with($cleanWa, '62')) {
+            $cleanWa = '0' . substr($cleanWa, 2);
+        }
+
         User::create([
-            'name'      => $request->name,
-            'email'     => $request->email,
+            'name'      => trim($request->name),
+            'email'     => trim($request->email),
             'password'  => Hash::make($request->password),
             'role'      => $request->role,
-            'whatsapp'  => $request->whatsapp,
+            'whatsapp'  => $cleanWa,
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'User baru dibuat.');
+        return redirect()->route('dashboard')->with('success', 'User baru berhasil dibuat.');
     }
 
     public function resetPassword(Request $request, $id)

@@ -31,6 +31,10 @@ class AuthController extends Controller
     // ─────────────────────────────────────────
     public function login(Request $request)
     {
+        $request->merge([
+            'email' => trim((string) $request->email),
+        ]);
+
         $credentials = $request->validate([
             'email'    => 'required|string',
             'password' => 'required|string',
