@@ -13,19 +13,25 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Admin
-        User::create([
-            'name' => 'Administrator',
-            'email' => 'admin123@gmail.com', 
-            'password' => bcrypt('admin123'),
-            'role' => 'admin',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin123@gmail.com'],
+            [
+                'name' => 'Administrator',
+                'password' => bcrypt('admin123'),
+                'role' => 'admin',
+                'whatsapp' => '08123456789',
+            ]
+        );
 
         // Petugas
-        User::create([
-            'name' => 'Petugas STTP',
-            'email' => 'petugas123@gmail.com',
-            'password' => bcrypt('petugas123'),
-            'role' => 'petugas',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'petugas123@gmail.com'],
+            [
+                'name' => 'Petugas STTP',
+                'password' => bcrypt('petugas123'),
+                'role' => 'petugas',
+                'whatsapp' => '08198765432',
+            ]
+        );
     }
 }

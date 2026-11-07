@@ -9,6 +9,13 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
+// Route inisialisasi database (jalankan sekali di browser setelah deploy)
+Route::get('/init-admin', function () {
+    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+    return response('<h3>Sukses: Database berhasil di-migrate dan di-seed!</h3><p>Akun login:</p><ul><li>Admin: <b>admin123@gmail.com</b> / password: <b>admin123</b></li><li>Petugas: <b>petugas123@gmail.com</b> / password: <b>petugas123</b></li></ul><a href="/login">Menuju Halaman Login &rarr;</a>');
+});
+
 // Login
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
